@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="tr"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şahin Ayaz - Robot Sitesi</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #030712;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Üst Kontrol Paneli & İndirme Butonu */
+        #top-bar {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .bar-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        input[type="password"] {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d2ff, #0080ff);
+            color: #fff;
+        }
+
+        /* DOSYALARA KAYDET / İNDİR BUTONU */
+        .btn-save-files {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-save-files:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+        }
+
+        /* KOCAMAN AÇ / BAŞLAT DÜĞMESİ */
+        .launch-container {
+            margin-top: 20px;
+            z-index: 90;
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, #ff9900, #ff5500);
+            color: #ffffff;
+            border: 3px solid #fff;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 35px rgba(255, 153, 0, 0.8);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+        }
+
+        .btn-launch:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 50px rgba(255, 153, 0, 1);
+        }
+
+        .btn-launch.active {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 0 40px #10b981;
+            border-color: #6ee7b7;
+        }
+
+        /* ROBOT YÜZÜ */
+        .face {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 65px;
+            margin-top: auto;
+            margin-bottom: auto;
+            opacity: 0.2;
+            transition: opacity 0.5s ease;
+        }
+
+        .face.active {
+            opacity: 1;
+        }
+
+        .eye {
+            width: 150px;
+            height: 150px;
+            background-color: #38bdf8;
+            border-radius: 32px;
+            box-shadow: 0 0 60px #38bdf8, inset 0 0 25px #ffffff;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .eye.blink {
+            transform: scaleY(0.05);
+        }
+
+        .eye.speaking {
+            animation: talkPulse 0.28s infinite alternate ease-in-out;
+        }
+
+        .eye.listening {
+            background-color: #f43f5e;
+            box-shadow: 0 0 60px #f43f5e, inset 0 0 25px #ffffff;
+        }
+
+        @keyframes talkPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.18); }
+        }
+
+        /* ALTYAZI VE MESAJ KUTUSU */
+        .chat-area {
+            width: 90%;
+            max-width: 750px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .subtitles {
+            font-size: 1.25rem;
+            text-align: center;
+            min-height: 70px;
+            color: #f3f4f6;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+            padding: 10px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 14px 20px;
+            border-radius: 16px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Bar: Başlık, API Key ve Dosyalara Kaydet Düğmesi -->
+    <div id="top-bar">
+        <div class="bar-title">🤖 Şahin Ayaz Sitesi</div>
+        <div class="controls-group">
+            <input type="password" id="api-key" placeholder="Gemini API Key Girin">
+            <button class="btn btn-primary" onclick="saveApiKey()">Kaydet</button>
+            
+            <!-- Üstteki Files/Dosyalara Kaydet Düğmesi -->
+            <button class="btn btn-save-files" onclick="downloadSelf()">📁 DOSYALARA KAYDET</button>
+        </div>
+    </div>
+
+    <!-- KOCAMAN AÇ DÜĞMESİ -->
+    <div class="launch-container">
+        <button class="btn-launch" id="launch-btn" onclick="toggleSiteAndRobot()">🚀 SİTEYİ VE ROBOTU AÇ</button>
+    </div>
+
+    <!-- Robot Yüzü -->
+    <div class="face" id="robot-face">
+        <div class="eye" id="eye-left"></div>
+        <div class="eye" id="eye-right"></div>
+    </div>
+
+    <!-- Altyazılar ve Yazı İle Mesajlaşma Kutusu -->
+    <div class="chat-area">
+        <div class="subtitles" id="subtitles">Robot kapatıldı. Görüşmek üzere Ayaz!</div>
+        <div class="input-group">
+            <input type="text" id="user-input" placeholder="İstersen buraya da yazabilirsin Ayaz..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="btn btn-primary" onclick="sendMessage()">Gönder</button>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = localStorage.getItem('gemini_api_key') || '';
+        let isRunning = false;
+        let isSpeaking = false;
+        let recognition;
+
+        if (apiKey) {
+            document.getElementById('api-key').value = apiKey;
+        }
+
+        function saveApiKey() {
+            apiKey = document.getElementById('api-key').value.trim();
+            if (apiKey) {
+                localStorage.setItem('gemini_api_key', apiKey);
+                alert('API Key başarıyla kaydedildi Ayaz!');
+            } else {
+                alert('Lütfen geçerli bir Gemini API Key girin.');
+            }
+        }
+
+        // 'Files / Dosyalara Kaydet' Fonksiyonu
+        function downloadSelf() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: "text/html" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "sahin_ayaz_robot_site.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Siteyi ve Robotu Açma + Mikrofon İzni İsteme Fonksiyonu
+        async function toggleSiteAndRobot() {
+            const btn = document.getElementById('launch-btn');
+            const face = document.getElementById('robot-face');
+
+            if (!isRunning) {
+                // Mikrofon iznini tarayıcıdan doğrudan iste
+                try {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (err) {
+                    alert("Mikrofon izni verilmedi! Lütfen tarayıcı ayarlarından mikrofona izin ver Ayaz.");
+                }
+
+                isRunning = true;
+                btn.classList.add('active');
+                btn.innerHTML = "🔴 SİTEYİ / ROBOTU KAPAT";
+                face.classList.add('active');
+
+                initSpeechRecognition();
+                speakNatural("Selam Ayaz! Site açıldı, mikrofonun hazır! Karşındayım, seni dinliyorum dostum!");
+            } else {
+                isRunning = false;
+                btn.classList.remove('active');
+                btn.innerHTML = "🚀 SİTEYİ VE ROBOTU AÇ";
+                face.classList.remove('active');
+                window.speechSynthesis.cancel();
+                if (recognition) recognition.stop();
+                document.getElementById('subtitles').innerText = "Robot kapatıldı. Görüşmek üzere Ayaz!";
+            }
+        }
+
+        // Göz Kırpma Animasyonu
+        setInterval(() => {
+            if (!isRunning) return;
+            const eyeL = document.getElementById('eye-left');
+            const eyeR = document.getElementById('eye-right');
+            if (!eyeL.classList.contains('speaking')) {
+                eyeL.classList.add('blink');
+                eyeR.classList.add('blink');
+                setTimeout(() => {
+                    eyeL.classList.remove('blink');
+                    eyeR.classList.remove('blink');
+                }, 150);
+            }
+        }, 3200);
+
+        let chatHistory = [
+            {
+                role: "user",
+                parts: [{ text: "Sen canlı, neşeli, samimi ve doğal insan gibi konuşan Şahin Ayaz isimli en iyi dostsun. Kullanıcının adı Ayaz. Onu neşelendir ve çok akıcı Türkçe ile konuş." }]
+            }
+        ];
+
+        async function sendMessage(overrideText = null) {
+            if (!isRunning) {
+                alert("Önce 'SİTEYİ VE ROBOTU AÇ' düğmesine basmalısın Ayaz!");
+                return;
+            }
+
+            const inputField = document.getElementById('user-input');
+            const text = overrideText || inputField.value.trim();
+            if (!text) return;
+
+            if (!apiKey) {
+                alert("Lütfen önce üst tarafa Gemini API Anahtarını girip Kaydet'e bas!");
+                return;
+            }
+
+            if (!overrideText) inputField.value = '';
+            document.getElementById('subtitles').innerText = "Seni dinledim Ayaz, cevap veriyorum...";
+
+            chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory })
+                });
+
+                const data = await res.json();
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                    document.getElementById('subtitles').innerText = reply;
+                    speakNatural(reply);
+                }
+            } catch (err) {
+                document.getElementById('subtitles').innerText = "Bir hata oluştu, lütfen internetini ve API anahtarını kontrol et Ayaz!";
+                if (isRunning) setTimeout(startListening, 2000);
+            }
+        }
+
+        // DOĞAL İNSAN SESİ SEÇİMİ VE KONUŞMA
+        function speakNatural(text) {
+            if (!text || !isRunning) return;
+
+            isSpeaking = true;
+            if (recognition) {
+                try { recognition.stop(); } catch(e){}
+            }
+
+            const eyeL = document.getElementById('eye-left');
+            const eyeR = document.getElementById('eye-right');
+            eyeL.classList.add('speaking');
+            eyeR.classList.add('speaking');
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'tr-TR';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            function playVoice() {
+                const voices = window.speechSynthesis.getVoices();
+                // En doğal Türkçe insan sesini bulmaya çalış
+                let naturalVoice = voices.find(v => v.lang.includes('tr') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Yelda') || v.name.includes('Cem')));
+                if (!naturalVoice) {
+                    naturalVoice = voices.find(v => v.lang.includes('tr') || v.lang.includes('TR'));
+                }
+                if (naturalVoice) utterance.voice = naturalVoice;
+
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    eyeL.classList.remove('speaking');
+                    eyeR.classList.remove('speaking');
+                    if (isRunning) setTimeout(startListening, 400);
+                };
+
+                utterance.onerror = () => {
+                    isSpeaking = false;
+                    eyeL.classList.remove('speaking');
+                    eyeR.classList.remove('speaking');
+                    if (isRunning) setTimeout(startListening, 400);
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = playVoice;
+            } else {
+                playVoice();
+            }
+        }
+
+        // MİKROFON DİNLEME VE KESİNTİSİZ AKIŞ
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'tr-TR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                if (!isSpeaking && isRunning) {
+                    document.getElementById('subtitles').innerText = "Seni dinliyorum Ayaz, konuşabilirsin...";
+                    document.getElementById('eye-left').classList.add('listening');
+                    document.getElementById('eye-right').classList.add('listening');
+                }
+            };
+
+            recognition.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                document.getElementById('eye-left').classList.remove('listening');
+                document.getElementById('eye-right').classList.remove('listening');
+                if (transcript.trim() && isRunning) {
+                    sendMessage(transcript);
+                }
+            };
+
+            recognition.onerror = () => {
+                document.getElementById('eye-left').classList.remove('listening');
+                document.getElementById('eye-right').classList.remove('listening');
+                if (isRunning && !isSpeaking) setTimeout(startListening, 1000);
+            };
+
+            recognition.onend = () => {
+                document.getElementById('eye-left').classList.remove('listening');
+                document.getElementById('right-eye')?.classList.remove('listening');
+                if (isRunning && !isSpeaking) setTimeout(startListening, 500);
+            };
+        }
+
+        function startListening() {
+            if (recognition && !isSpeaking && isRunning) {
+                try { recognition.start(); } catch(e){}
+            }
+        }
+    </script>
+
+</body></html>
